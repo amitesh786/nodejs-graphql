@@ -3,53 +3,63 @@ import { GraphQLServer } from "graphql-yoga"
 // Type definition (schema)
 const typeDefs = `
 	type Query {
+		add(numbers: [Float!]!): Float!
+		grades: [Int]!
+		me: User!
+		post: Post!
+	}
+
+	type User {
 		id: ID!
 		name: String!
-		age: Int!
-		employed: Boolean!
-		gpa: Float
+		email: String!
+		age: Int
+		post: Post!
+	}
+
+	type Post {
+		id: ID!
 		title: String!
-		price: Float!
-		releaseYear: Int
-		rating: Float
-		inStock: Boolean!
+		body: String!
+		published: Boolean!
 	}
 `
 
 // Resolvers
 const resolvers = {
 	Query: {
-		id() {
-			return 'abc123'
+		add(parent, args, ctx, info) {
+			if(args.numbers.length === 0) {
+				return 0
+			} 
+			return args.numbers.reduce( (accumlator, currentValue) => {
+				return accumlator + currentValue
+			})
 		},
-		name() {
-			return 'Amitesh'
+		grades(parent, args, ctx, info) {
+			return [99, 98, 92]
 		},
-		age() {
-			return 31
+		me() {
+			return {
+				id: 'abc1234',
+				name: 'Amitesh',
+				email: 'amitesh@gmail.com',
+				post: {
+					id: '123abc',
+					title: '2 States',
+					body: 'Details very good',
+					published: true
+				}
+			}
 		},
-		employed() {
-			return true
-		},
-		gpa() {
-			return null
-		},
-		title() {
-			return 'Product name'
-		},
-		price() {
-			return 2.222
-		},
-		releaseYear() {
-			return null
-		},
-		rating() {
-			return 4
-		},
-		inStock() {
-			return true
+		post() {
+			return {
+				id: '123abc',
+				title: '2 States',
+				body: 'Details very good',
+				published: true
+			}
 		}
-
 	}
 }
 
@@ -58,6 +68,6 @@ const server = new GraphQLServer({
 	resolvers: resolvers
 })
 
-server.start( () => {
+server.start(() => {
 	console.log('server is up..!!!')
 })
