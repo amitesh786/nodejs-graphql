@@ -1,10 +1,53 @@
 import { GraphQLServer } from "graphql-yoga"
 
+// Demo user data
+const users = [
+	{
+		id: '1',
+		name: 'Amitesh',
+		email: 'amitesh@gmail.com',
+		age: 27
+	},
+	{
+		id: '2',
+		name: 'Singh',
+		email: 'singh@gmail.com',
+		age: 30
+	},
+	{
+		id: '3',
+		name: 'Princi',
+		email: 'princi@gmail.com',
+		age: 24
+	},
+];
+
+const posts = [
+	{
+		id: '123abc',
+		title: '2 States',
+		body: 'Very good',
+		published: true
+	},
+	{
+		id: 'abc123',
+		title: '3 Book',
+		body: 'Not good',
+		published: false
+	},
+	{
+		id: 'zxcabc',
+		title: 'GraphQL',
+		body: 'Fair',
+		published: true
+	}
+];
+
 // Type definition (schema)
 const typeDefs = `
 	type Query {
-		add(numbers: [Float!]!): Float!
-		grades: [Int]!
+		users(query: String): [User!]!
+		posts(query: String): [Post!]!
 		me: User!
 		post: Post!
 	}
@@ -14,7 +57,6 @@ const typeDefs = `
 		name: String!
 		email: String!
 		age: Int
-		post: Post!
 	}
 
 	type Post {
@@ -28,28 +70,31 @@ const typeDefs = `
 // Resolvers
 const resolvers = {
 	Query: {
-		add(parent, args, ctx, info) {
-			if(args.numbers.length === 0) {
-				return 0
-			} 
-			return args.numbers.reduce( (accumlator, currentValue) => {
-				return accumlator + currentValue
+		users(parent, args, ctx, info) {
+			if (!args.query) {
+				return users
+			}
+
+			return users.filter((user) => {
+				return user.name.toLocaleLowerCase().includes(args.query.toLocaleLowerCase())
 			})
 		},
-		grades(parent, args, ctx, info) {
-			return [99, 98, 92]
+		posts(parent, args, ctx, info) {
+			if (!args.query) {
+				return posts
+			}
+
+			return posts.filter((post) => {
+				const titleMatch = post.title.toLocaleLowerCase().includes(args.query.toLocaleLowerCase())
+				const bodyMatch = post.body.toLocaleLowerCase().includes(args.query.toLocaleLowerCase())
+				return titleMatch || bodyMatch
+			})
 		},
 		me() {
 			return {
 				id: 'abc1234',
 				name: 'Amitesh',
-				email: 'amitesh@gmail.com',
-				post: {
-					id: '123abc',
-					title: '2 States',
-					body: 'Details very good',
-					published: true
-				}
+				email: 'amitesh@gmail.com'
 			}
 		},
 		post() {
